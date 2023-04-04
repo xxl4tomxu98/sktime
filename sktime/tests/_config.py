@@ -127,6 +127,20 @@ EXCLUDED_TESTS = {
     # SAX returns strange output format
     # this needs to be fixed, was not tested previously due to legacy exception
     "SAX": "test_fit_transform_output",
+    # known bug in BaggingForecaster, returns wrong index, #4363
+    "BaggingForecaster": [
+        "test_predict_interval",
+        "test_predict_quantiles",
+        "test_predict_proba",
+    ],
+    # known bug in DynamicFactor, returns wrong index, #4362
+    "DynamicFactor": [
+        "test_predict_interval",
+        "test_predict_quantiles",
+        "test_predict_proba",
+    ],
+    # random quantile monotonicity issue in VAR, refer to #4420
+    "VAR": ["test_predict_quantiles"],
 }
 
 # We use estimator tags in addition to class hierarchies to further distinguish

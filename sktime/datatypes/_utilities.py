@@ -43,6 +43,9 @@ def get_time_index(X):
         # nested_univ
         elif isinstance(X, pd.DataFrame) and isinstance(X.iloc[0, 0], pd.DataFrame):
             return _get_index(X.iloc[0, 0])
+        # nested_univ
+        elif isinstance(X, pd.DataFrame) and isinstance(X.iloc[0, 0], pd.Series):
+            return _get_index(X.iloc[0, 0])
         # pd.Series or pd.DataFrame
         else:
             return X.index
@@ -273,9 +276,12 @@ def get_cutoff(
         if not return_index:
             return idx[ix]
         res = idx[[ix]]
-        if hasattr(idx, "freq") and idx.freq is not None:
-            if res.freq != idx.freq:
-                res.freq = idx.freq
+        if hasattr(idx, "freq"):
+            if idx.freq is None:
+                res.freq = pd.infer_freq(idx)
+            else:
+                if res.freq != idx.freq:
+                    res.freq = idx.freq
         return res
 
     if isinstance(obj, pd.Series):
