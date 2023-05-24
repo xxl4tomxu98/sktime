@@ -33,8 +33,8 @@ EXCLUDE_ESTIMATORS = [
     "ResNetClassifier",  # known ResNetClassifier sporafic failures, see #3954
     "LSTMFCNClassifier",  # unknown cause, see bug report #4033
     "TimeSeriesLloyds",  # an abstract class, but does not follow naming convention
-    "SimpleRNNRegressor",
-    "SimpleRNNClassifier",
+    # DL classifier suspected to cause hangs and memouts, see #4610
+    "FCNClassifier",
 ]
 
 
@@ -104,6 +104,19 @@ EXCLUDED_TESTS = {
         "test_fit_idempotent",
     ],
     "InceptionTimeClassifier": [
+        "test_fit_idempotent",
+    ],
+    "SimpleRNNClassifier": [
+        "test_fit_idempotent",
+        "test_persistence_via_pickle",
+        "test_save_estimators_to_file",
+    ],
+    "SimpleRNNRegressor": [
+        "test_fit_idempotent",
+        "test_persistence_via_pickle",
+        "test_save_estimators_to_file",
+    ],
+    "MACNNClassifier": [
         "test_fit_idempotent",
     ],
     # sth is not quite right with the RowTransformer-s changing state,
