@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Implements simple conformal forecast intervals.
 
 Code based partially on NaiveVariance by ilyasmoutawwakil.
@@ -124,6 +123,7 @@ class ConformalIntervals(BaseForecaster):
         "handles-missing-data": False,
         "ignores-exogeneous-X": False,
         "capability:pred_int": True,
+        "capability:pred_int:insample": False,
     }
 
     ALLOWED_METHODS = [
@@ -142,7 +142,6 @@ class ConformalIntervals(BaseForecaster):
         verbose=False,
         n_jobs=None,
     ):
-
         if not isinstance(method, str):
             raise TypeError(f"method must be a str, one of {self.ALLOWED_METHODS}")
 
@@ -159,7 +158,7 @@ class ConformalIntervals(BaseForecaster):
         self.n_jobs = n_jobs
         self.forecasters_ = []
 
-        super(ConformalIntervals, self).__init__()
+        super().__init__()
 
         tags_to_clone = [
             "requires-fh-in-fit",
@@ -244,6 +243,7 @@ class ConformalIntervals(BaseForecaster):
         """
         fh_relative = fh.to_relative(self.cutoff)
         fh_absolute = fh.to_absolute(self.cutoff)
+        fh_absolute_idx = fh_absolute.to_pandas()
 
         if self.fh_early_:
             residuals_matrix = self.residuals_matrix_
@@ -259,7 +259,7 @@ class ConformalIntervals(BaseForecaster):
         ABS_RESIDUAL_BASED = ["conformal", "conformal_bonferroni", "empirical_residual"]
 
         cols = pd.MultiIndex.from_product([["Coverage"], coverage, ["lower", "upper"]])
-        pred_int = pd.DataFrame(index=fh_absolute, columns=cols)
+        pred_int = pd.DataFrame(index=fh_absolute_idx, columns=cols)
         for fh_ind, offset in zip(fh_absolute, fh_relative):
             resids = np.diagonal(residuals_matrix, offset=offset)
             resids = resids[~np.isnan(resids)]
@@ -283,7 +283,7 @@ class ConformalIntervals(BaseForecaster):
 
         y_pred = self.predict(fh=fh, X=X)
         y_pred = convert(y_pred, from_type=self._y_mtype_last_seen, to_type="pd.Series")
-        y_pred.index = fh_absolute
+        y_pred.index = fh_absolute_idx
 
         for col in cols:
             if self.method in ABS_RESIDUAL_BASED:
@@ -325,7 +325,6 @@ class ConformalIntervals(BaseForecaster):
         return pred_int
 
     def _parse_initial_window(self, y, initial_window=None):
-
         n_samples = len(y)
 
         if initial_window is None:
@@ -345,15 +344,13 @@ class ConformalIntervals(BaseForecaster):
             and (initial_window <= 0 or initial_window >= 1)
         ):
             raise ValueError(
-                "initial_window={0} should be either positive and smaller"
-                " than the number of samples {1} or a float in the "
+                "initial_window={} should be either positive and smaller"
+                " than the number of samples {} or a float in the "
                 "(0, 1) range".format(initial_window, n_samples)
             )
 
         if initial_window is not None and initial_window_type not in ("i", "f"):
-            raise ValueError(
-                "Invalid value for initial_window: {}".format(initial_window)
-            )
+            raise ValueError(f"Invalid value for initial_window: {initial_window}")
 
         if initial_window_type == "f":
             n_initial_window = int(floor(initial_window * n_samples))
