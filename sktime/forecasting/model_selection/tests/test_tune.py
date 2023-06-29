@@ -1,5 +1,4 @@
 #!/usr/bin/env python3 -u
-# -*- coding: utf-8 -*-
 # copyright: sktime developers, BSD-3-Clause License (see LICENSE file)
 """Test grid search CV."""
 
@@ -35,7 +34,7 @@ from sktime.performance_metrics.forecasting import (
 from sktime.performance_metrics.forecasting.probabilistic import CRPS, PinballLoss
 from sktime.transformations.series.detrend import Detrender
 from sktime.utils._testing.hierarchical import _make_hierarchical
-from sktime.utils.validation._dependencies import _check_soft_dependencies
+from sktime.utils.validation._dependencies import _check_estimator_deps
 
 TEST_METRICS = [MeanAbsolutePercentageError(symmetric=True), MeanSquaredError()]
 TEST_METRICS_PROBA = [CRPS(), PinballLoss()]
@@ -121,8 +120,8 @@ def test_gscv(forecaster, param_grid, cv, scoring, error_score):
 def test_rscv(forecaster, param_grid, cv, scoring, error_score, n_iter, random_state):
     """Test ForecastingRandomizedSearchCV.
 
-    Tests that ForecastingRandomizedSearchCV successfully searches the
-    parameter distributions to identify the best parameter set
+    Tests that ForecastingRandomizedSearchCV successfully searches the parameter
+    distributions to identify the best parameter set
     """
     y, X = load_longley()
     rscv = ForecastingRandomizedSearchCV(
@@ -171,7 +170,7 @@ def test_gscv_hierarchical(forecaster, param_grid, cv, scoring, error_score):
 
 
 @pytest.mark.skipif(
-    not _check_soft_dependencies("statsmodels", severity="none"),
+    not _check_estimator_deps(ARIMA, severity="none"),
     reason="skip test if required soft dependency for hmmlearn not available",
 )
 @pytest.mark.parametrize("scoring", TEST_METRICS_PROBA)
